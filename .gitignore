@@ -48,3 +48,12 @@ Thumbs.db
 *.mov
 *.wmv
 
+## User settings
+xcuserdata/
+
+## CocoaPods & build settings
+Pods/*
+.build/
+*.xcworkspace
+
+
