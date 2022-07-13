@@ -20,9 +20,10 @@ class SessionManager: APIService {
       return nil
     }
     
-    static func performRequest<Type>(_ request: URLRequest, decodingTo type: Type.Type, expectedStatusCodes: [Int], completion: @escaping (Type?, Error?) -> Void) where Type : Decodable, Type : Encodable {
-        AF.request(request)
-            .response(completionHandler: { (response) in
+    static func performRequest<Type>(_ request: ApiRequest, decodingTo type: Type.Type, expectedStatusCodes: [Int], completion: @escaping (Type?, Error?) -> Void) where Type : Decodable, Type : Encodable {
+        let request = AF.request(request.url, method: request.method, parameters: request.param, encoding: request.encoding, headers: HTTPHeaders(request.header), interceptor: nil, requestModifier: nil)
+        
+        request.response(completionHandler: { (response) in
                 if let error = checkCancelled(response.error) {
                     completion(nil, error)
                     return
@@ -42,7 +43,9 @@ class SessionManager: APIService {
             })
     }
     
-    static func performUploadRequest<Type>(_ request: URLRequest, uploadingData data: Data, decodingTo type: Type.Type, expectedStatusCodes: [Int], completion: @escaping (Type?, Error?) -> Void) where Type : Decodable, Type : Encodable {
+    static func performUploadRequest<Type>(_ request: ApiRequest, uploadingData data: URL, decodingTo type: Type.Type, expectedStatusCodes: [Int], completion: @escaping (Type?, Error?) -> Void) where Type : Decodable, Type : Encodable {
+        let request = try! AF.request(request.url, method: request.method, parameters: request.param, encoding: request.encoding, headers: HTTPHeaders(request.header), interceptor: nil, requestModifier: nil).convertible.asURLRequest()
+        
         AF.upload(multipartFormData: { (multipart) in
             multipart.append(data, withName: "image", fileName: "someFile.jpg", mimeType: "image/jpeg")
         }, with: request)
@@ -72,9 +75,12 @@ class SessionManager: APIService {
         }
       }
     
-    static func performVideoUploadRequest<Type>(_ request: URLRequest, uploadingData data: URL, decodingTo type: Type.Type, expectedStatusCodes: [Int], completion: @escaping (Type?, Error?) -> Void) where Type : Decodable, Type : Encodable {
+    static func performVideoUploadRequest<Type>(_ request: ApiRequest, uploadingData data: URL, decodingTo type: Type.Type, expectedStatusCodes: [Int], completion: @escaping (Type?, Error?) -> Void) where Type : Decodable, Type : Encodable {        
+        let request = try! AF.request(request.url, method: request.method, parameters: request.param, encoding: request.encoding, headers: HTTPHeaders(request.header), interceptor: nil, requestModifier: nil).convertible.asURLRequest()
+
+
         AF.upload(multipartFormData: { (multipart) in
-            multipart.append(data, withName: "video", fileName: "someFile.mp4", mimeType: "image/jpeg")
+            multipart.append(data, withName: "video", fileName: "video.mp4", mimeType: "video/mp4")
         }, with: request)
         .uploadProgress(closure: { progress in
             print("Upload Progress: \(progress.fractionCompleted)")
@@ -108,6 +114,7 @@ extension DataResponse {
     func decodeData<Type: Codable>(to: Type.Type) ->Result<Type, Error> {
         guard let data = data else { return .failure(StandardServiceErrors.noResponseData) }
         do {
+            print("\(String(data: data, encoding: .utf8) ?? "")")
             let decodedData = try JSONDecoder().decode(Type.self, from: data)
             return .success(decodedData)
         } catch {

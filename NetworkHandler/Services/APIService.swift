@@ -31,17 +31,17 @@ extension StandardServiceErrors: LocalizedError {
 
 protocol APIService {
   static func performRequest<Type: Codable>(
-    _ request: URLRequest, decodingTo type: Type.Type, expectedStatusCodes: [Int],
+    _ request: ApiRequest, decodingTo type: Type.Type, expectedStatusCodes: [Int],
     completion: @escaping (Type?, Error?) -> Void)
   
     
   static func performUploadRequest<Type: Codable>(
-    _ request: URLRequest, uploadingData data: Data,
+    _ request: ApiRequest, uploadingData data: URL,
     decodingTo type: Type.Type, expectedStatusCodes: [Int],
     completion: @escaping (Type?, Error?) -> Void)
   
   static func performVideoUploadRequest<Type: Codable>(
-    _ request: URLRequest, uploadingData data: URL,
+    _ request: ApiRequest, uploadingData data: URL,
     decodingTo type: Type.Type, expectedStatusCodes: [Int],
     completion: @escaping (Type?, Error?) -> Void)
 }
