@@ -33,7 +33,7 @@ struct ContentView: View {
     
     func imageRequest() {
         guard let imageFilePath = Bundle.main.url(forResource: "image", withExtension: "png") else { return }
-        let request = ApiRequest.createRequest(url: URL(string: "http://3.109.22.217:8000/api/v1/users/upload-video")!, method: .post, header: nil, paramModel: VideoRequest(video: imageFilePath.absoluteString))
+        let request = ApiRequest.createRequest(url: URL(string: "http://3.109.22.217:8000/api/v1/users/upload-images")!, method: .post, header: nil, paramModel: VideoRequest(video: imageFilePath.absoluteString))
         SessionManager.performUploadRequest(request, uploadingData: imageFilePath, decodingTo: DataWrapper<Empty>.self, expectedStatusCodes: [200]) { respose, error in
             print("")
         }
